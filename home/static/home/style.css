@@ -1,0 +1,170 @@
+{% load static}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 70px;
+    padding-top: 50px;
+}
+
+.sign-panel {
+    margin-top: 10px;
+}
+
+.jumbotron{
+    height: 300px;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
+
+.jumbotron .container{
+    position: relative;
+    top: 50%;
+    transform:translateY(-50%);
+}
+
+.span-button{
+    cursor: pointer;
+    pointer-events: all;
+}
+
+.index-category {
+
+}
+
+.index-category img {
+    width: 145px;
+    height: 217px;
+    border-radius: 10px
+}
+
+.review-list-rating {
+    display: inline-block;
+    color: #fde16d;
+}
+
+.review-list-user-info > * {
+    padding-right: 5px;
+}
+
+.review-list-like {
+    display: inline-block;
+}
+
+.review-list-title {
+    background-color: #e5e5e5;padding: 5px
+}
+
+.user-review-comment > div{
+    margin-bottom: 20px;
+}
+
+.review-comment-delete {
+    display: none;
+}
+
+.user-profile-small {
+    width: 50px;
+    height: 50px;
+}
+
+.space-headline-container {
+    display: inline-block;
+    height: 50px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.space-headline-container * {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.space-headline-container .user-info {
+    /*font-size: 20px;*/
+    /*font-weight: 300;*/
+}
+
+.space-index-review-list {
+    margin-bottom: 10px;
+}
+
+.space-index-watches-list {
+    margin-bottom: 10px;
+}
+
+.space-index-watches-list > *{
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.space-profile-img > img{
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.space-profile-info {
+    margin-top: 10px;
+}
+
+.search-list {
+    margin-bottom: 5px;
+}
+
+.space-following-cancel {
+    display: none;
+}
+
+.recommend-list {
+    margin-right:5px;
+    margin-bottom: 5px;
+}
+
+.hr {
+    border-top: 1px solid #eee;
+    margin: 10px 0px 10px 0px;
+}
+
+.hr-dot {
+    border-bottom: 1px dashed #DDDDDD;
+    line-height: 100%;
+    clear: both;
+}
+
+.center-block {
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);
+    position: relative;
+}
+
+.horizontal-center{
+    top: 50%;
+    transform: translateY(-50%);
+    position: relative;
+}
+
+.sys-chart > div{
+    position: relative;
+    margin: auto;
+}
+
+.footer {
+    position: absolute;
+    padding: 10px 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    /* Set the fixed height of the footer here */
+    height: 70px;
+    border-top: 1px solid #e5e5e5;
+    background-color: #f5f5f5;
+}

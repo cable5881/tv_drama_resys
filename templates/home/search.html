@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}搜索结果:{{ search_text }}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>关于“{{ search_text }}”的搜索结果(全部共<mark>{{ paginator.count }}</mark>条)</h2>
+            </div>
+        </div>
+
+        <!-- 搜索结果开始 -->
+        <div>
+            {% for drama in object_list %}
+                <div class="row">
+                    <p class="hr-dot"></p>
+                    <div class="col-md-9">
+                        <div class="col-md-2">
+                            <a href="{% url 'dramas:drama_detail' drama.id %}">
+                                <img src="{{ drama.image }}" alt="{{ drama.title_cn }}" style="height: 150px; width: 100px;">
+                            </a>
+                        </div>
+                        <div class="col-md-10">
+                            <mark><a href="{% url 'dramas:drama_detail' drama.id %}">{{ drama.title_cn }}/ {{ drama.alternate_name }} / {{ drama.title_en }}</a></mark>
+                            <div>
+                                <span>
+                                    {% for director in drama.director_set.all %}{{ director.name }} /{% endfor %}
+                                    {% for cast in drama.cast_set.all %}{{ cast.name }} / {% endfor %}
+                                </span>
+                            </div>
+
+                            <div>
+                                {% load my_tag %}
+                                {% divide drama.avg_rating 2 as stars %}
+                                <span class="review-list-rating">
+                                    {% for i in stars|times %}
+                                        <i class="glyphicon glyphicon-star"></i>
+                                    {% endfor %}
+                                </span>
+                                <span>{{ drama.avg_rating }}</span>
+                                <span>（<a href="{% url 'reviews:review_list' drama.id %}">{{ drama.reviews.count }}人评价</a>）</span>
+                            </div>
+                            <p>{{ drama.summary|truncatechars:150 }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- 分页 -->
+        <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                            {% endif %}
+
+                            <span class="current">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+{% endblock %}

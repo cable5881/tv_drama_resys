@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{{ drama.title_cn }}的剧评{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <!-- 评论开始 -->
+        <div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>{{ drama.title_cn }}的剧评(全部共<mark>{{ paginator.count }}</mark>条)</h2>
+                </div>
+            </div>
+
+            {% for review in object_list %}
+                <div>
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="review-list-title">
+                                <a href="{% url 'reviews:review_detail' review.id %}"><span>{{ review.title }}</span></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xs-6 col-md-9 review-list-user-info">
+                            <img src="https://img3.doubanio.com/icon/u39561667-4.jpg"/>
+                            <span>{{ review.user.nickname }}</span>
+
+                            {% load my_tag %}
+                            {% divide review.rating 2 as stars %}
+                            <span class="review-list-rating" data-value="{{ review.rating }}">
+                            {% for i in stars|times %}
+                                <i class="glyphicon glyphicon-star"></i>
+                            {% endfor %}
+                        </span>
+                            <span>{{ review.pubtime }}</span>
+                            <div class="review-list-like">
+                                <span class="glyphicon glyphicon-thumbs-up"></span>
+                                <span>{{ review.review_likes.count }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xs-6 col-md-9 review-list-user-info">
+                            <p>{{ review.content|truncatechars:200 }}
+                                <mark><a href="#">共{{ review.review_comments.count }}回应</a></mark>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            {% endfor %}
+            <!-- 评论结束 -->
+
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                            {% endif %}
+
+                            <span class="current">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+{% endblock %}

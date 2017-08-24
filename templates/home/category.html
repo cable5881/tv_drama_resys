@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}分类{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading">剧集索引</div>
+
+            <div class="panel-body">
+                <ul id="type_list" class="nav nav-pills" data-value="{{ type }}">
+                    {% if type %}
+                            <li role="presentation"><a href="{% url 'dramas:drama_category' %}">全部</a></li>
+                        {% for t in types %}
+                            {% if type == t.id %}
+                                <li role="presentation" class="active"><a href="{% url 'dramas:drama_category' %}?type={{ t.id }}">{{ t.type }}</a></li>
+                            {% else %}
+                                <li role="presentation"><a href="{% url 'dramas:drama_category' %}?type={{ t.id }}">{{ t.type }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                            <li role="presentation" class="active"><a href="{% url 'dramas:drama_category' %}">全部</a></li>
+                        {% for t in types %}
+                            <li role="presentation"><a href="{% url 'dramas:drama_category' %}?type={{ t.id }}">{{ t.type }}</a></li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+
+
+            <div class="panel-body">
+                <ul id="order_list" class="nav nav-pills" data-value="{{ order }}">
+                    <li id="test" role="presentation" value="year" data-value="year"><a>年份</a></li>
+                    <li role="presentation" value="avg_rating" data-value="avg_rating"><a>得分</a></li>
+                    <li role="presentation" value="total_rating" data-value="total_rating"><a>总排行</a></li>
+                    <li role="presentation" value="month_rating" data-value="month_rating"><a>月排行</a></li>
+                    <li role="presentation" value="week_rating" data-value="week_rating"><a>月排行</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">分类：魔幻</div>
+            <div class="panel-body">
+                <div class="row">
+                    {% for drama in object_list %}
+                        <div class="col-sm-6 col-md-6">
+                            <div class="col-md-4">
+                                <a href="{% url 'dramas:drama_detail' drama.id %}">
+                                    <img src="{{ drama.image }}" class="img-thumbnail" alt="{{ drama.title_cn }}" style="height: 210px;width: 140px">
+                                </a>
+                            </div>
+                            <div class="col-md-8">
+                                <h4>
+                                    <mark><a href="{% url 'dramas:drama_detail' drama.id %}">{{ drama.title_cn }}</a></mark>
+                                </h4>
+                                <p>
+                                    <span>原名:</span><span>{{ drama.title_en }}</span>
+                                </p>
+                                <p>
+                                    <span>又名:</span><span>{{ drama.alternate_name }}</span>
+                                </p>
+                                <p>
+                                    <span>年份:</span><span>{{ drama.year }}</span>
+                                </p>
+                                <p>
+                                    <span>分类:</span>
+                                    <span>
+                                        {% for drama_type in drama.types.all %}
+                                            {{ drama_type.type }}
+                                        {% endfor %}
+                                    </span>
+                                </p>
+                                <p>
+                                    <span>评分:</span><span>{{ drama.avg_rating }}</span>
+                                </p>
+                                <p>
+                                    <span>集数:</span><span>{{ drama.episodes }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 分页 -->
+        <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if page_obj.has_previous %}
+                                {% if page_args_str%}
+                                    <a href="?page={{ page_obj.previous_page_number }}{{ page_args_str }}">上一页</a>
+                                {% else %}
+                                    <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                                {% endif %}
+                            {% endif %}
+
+                            <span class="current">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                {% if page_args_str%}
+                                    <a href="?page={{ page_obj.next_page_number }}{{ page_args_str }}">下一页</a>
+                                {% else %}
+                                    <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                                {% endif %}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    var type_id = $('#type_list').attr('data-value')
+    var cur_order = $('#order_list').attr('data-value')
+    var orderLis = $('#order_list li')
+    if(type_id && cur_order) {
+        for(var i = 0; i < orderLis.length; i++) {
+            var node_order = $(orderLis[i]).attr('data-value')
+            $(orderLis[i]).find("a").attr('href', '/dramas/category?type=' + type_id + '&order=' + node_order)
+            if(cur_order == node_order) {
+                $(orderLis[i]).addClass('active')
+            }
+        }
+    } else if(type_id) {
+        $(orderLis[0]).addClass('active')
+        for(var i = 0; i < orderLis.length; i++) {
+            $(orderLis[i]).find("a").attr('href', '/dramas/category?type=' + type_id + '&order=' + $(orderLis[i]).attr('data-value'))
+        }
+    } else if(cur_order){
+        for(var i = 0; i < orderLis.length; i++) {
+            var node_order = $(orderLis[i]).attr('data-value')
+            $(orderLis[i]).find("a").attr('href', '/dramas/category?order=' + node_order)
+            if(cur_order == node_order) {
+                $(orderLis[i]).addClass('active')
+            }
+        }
+    } else {
+        $(orderLis[0]).addClass('active')
+        for(var i = 0; i < orderLis.length; i++) {
+            var node_order = $(orderLis[i]).attr('value')
+            $(orderLis[i]).find("a").attr('href', '/dramas/category?order=' + node_order)
+        }
+    }
+</script>
+{% endblock %}

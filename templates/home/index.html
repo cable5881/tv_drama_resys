@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}首页{% endblock %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="jumbotron" style="background-image: url('{% static 'home/img/bg_index.jpg' %}')">
+        <div class="container">
+            <form class="form-horizontal" onsubmit="return false;">
+                <div class="form-group-lg col-md-6 col-md-offset-3 has-feedback">
+                    <input id="searchInput" type="text" class="form-control" placeholder="搜索你想要的美剧">
+                    <span id="searchButton" class="glyphicon glyphicon-search form-control-feedback span-button" aria-hidden="true"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <div>
+            <div class="row">
+                <div class="col-md-11">
+                    <h2><b>科幻/魔幻</b></h2>
+                </div>
+            </div>
+            <div class="row hr"></div>
+            <div class="row">
+                <div class="col-md-offset-1 col-md-6 index-category">
+                    {% for d in sci_magic_new_dramas %}
+                        <div class="col-md-4">
+                            <div>
+                                <a href="{% url 'dramas:drama_detail' d.id %}">
+                                    <img src="{{ d.image }}">
+                                </a>
+                                <div class="caption text-center">
+                                    <h5><a href="{% url 'dramas:drama_detail' d.id %}">{{ d.title_cn }}</a></h5>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                    <span class="list-group-item list-group-item-info">科幻/魔幻总榜前10</span>
+                    {% for d in sci_magic_top10_dramas %}
+                        <a href="{% url 'dramas:drama_detail' d.id %}" class="list-group-item">{{ forloop.counter }}  {{ d.title_cn }}     {{ d.avg_rating }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2><b>灵异/惊悚</b></h2>
+                </div>
+            </div>
+            <div class="row hr"></div>
+            <div class="row">
+                <div class="col-md-offset-1 col-md-6 index-category">
+                    {% for d in supernatural_scary_new_dramas %}
+                        <div class="col-md-4">
+                            <div>
+                                <a href="{% url 'dramas:drama_detail' d.id %}">
+                                    <img src="{{ d.image }}">
+                                </a>
+                                <div class="caption text-center">
+                                    <h5><a href="{% url 'dramas:drama_detail' d.id %}">{{ d.title_cn }}</a></h5>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                    <span class="list-group-item list-group-item-info">灵异/惊悚总榜前10</span>
+                    {% for d in supernatural_scary_top10_dramas %}
+                        <a href="{% url 'dramas:drama_detail' d.id %}" class="list-group-item">{{ forloop.counter }}  {{ d.title_cn }}     {{ d.avg_rating }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2><b>都市/情感</b></h2>
+                </div>
+            </div>
+            <div class="row hr"></div>
+            <div class="row">
+                <div class="col-md-offset-1 col-md-6 index-category">
+                    {% for d in urban_emotional_new_dramas %}
+                        <div class="col-md-4">
+                            <div>
+                                <a href="{% url 'dramas:drama_detail' d.id %}">
+                                    <img src="{{ d.image }}">
+                                </a>
+                                <div class="caption text-center">
+                                    <h5><a href="{% url 'dramas:drama_detail' d.id %}">{{ d.title_cn }}</a></h5>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                    <span class="list-group-item list-group-item-info">都市/情感总榜前10</span>
+                    {% for d in urban_emotional_top10_dramas %}
+                        <a href="{% url 'dramas:drama_detail' d.id %}" class="list-group-item">{{ forloop.counter }}  {{ d.title_cn }}     {{ d.avg_rating }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2><b>犯罪/历史</b></h2>
+                </div>
+            </div>
+            <div class="row hr"></div>
+            <div class="row">
+                <div class="col-md-offset-1 col-md-6 index-category">
+                    {% for d in crime_historic_new_dramas %}
+                        <div class="col-md-4">
+                            <div>
+                                <a href="{% url 'dramas:drama_detail' d.id %}">
+                                    <img src="{{ d.image }}">
+                                </a>
+                                <div class="caption text-center">
+                                    <h5><a href="{% url 'dramas:drama_detail' d.id %}">{{ d.title_cn }}</a></h5>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                    <span class="list-group-item list-group-item-info">犯罪/历史总榜前10</span>
+                    {% for d in crime_historic_top10_dramas %}
+                        <a href="{% url 'dramas:drama_detail' d.id %}" class="list-group-item">{{ forloop.counter }}  {{ d.title_cn }}     {{ d.avg_rating }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        $('#searchButton').click(submit_search)
+    
+        function submit_search() {
+            var search_text = $('#searchInput').val()
+            if(search_text) {
+                window.location.href = "/dramas/search/wd=" + search_text
+            }
+        }
+        
+        $('#searchInput').keydown(function (event) {
+            var e = event || window.event || arguments.callee.caller.arguments[0];
+
+            if(e && e.keyCode==13){ // enter 键
+                 submit_search()
+            }
+        })
+    </script>
+{% endblock %}
+

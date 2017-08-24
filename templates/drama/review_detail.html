@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{{ review.title }}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>{{ review.title }}</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-9 review-list-user-info">
+                <img src="https://img3.doubanio.com/icon/u39561667-4.jpg"/>
+                <span>{{ review.user.nickname }}</span>
+                {% load my_tag %}
+                {% divide review.rating 2 as stars %}
+                    <span class="review-list-rating" data-value="{{ review.rating }}">
+                        {% for i in stars|times %}
+                            <i class="glyphicon glyphicon-star"></i>
+                        {% endfor %}
+                    </span>
+                <span>{{ review.pubtime }}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-9">
+                <p>{{ review.content }}
+                    <mark><a href="#">共{{ review.review_comments.count }}回应</a></mark>
+                </p>
+            </div>
+        </div>
+
+        <!-- 点赞 -->
+        <div class="row">
+            <div class="col-xs-12 col-md-9">
+                <form id="review_likes_form" method="post" class="center-block">
+                    {% csrf_token %}
+                    {% if review_like %}
+                        <input type="hidden" name="pk" value="{{ review_like.id }}">
+                        <a class="btn btn-default btn-lg active" role="button" onclick="submit_review_likes(false)">
+                            <span class="glyphicon glyphicon-thumbs-up"></span>
+                            <span>{{ review.review_likes.count }}</span>
+                        </a>
+                    {% else %}
+                        <input type="hidden" name="review" value="{{ review.id }}">
+                        <a class="btn btn-default btn-lg" role="button" onclick="submit_review_likes(true)">
+                            <span class="glyphicon glyphicon-thumbs-up"></span>
+                            <span>{{ review.review_likes.count }}</span>
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-9 hr"></div>
+        </div>
+
+        <!-- users' comments of this review -->
+        <div class="user-review-comment">
+            {% for review_comment in reviewcomment_list %}
+                <div class="row">
+                    <div class="col-md-1">
+                        <img src="https://img3.doubanio.com/icon/u39561667-4.jpg"/>
+                    </div>
+                    <div class="col-md-8 user-review-comment-area">
+                        <div class="col-md-12">
+                            <span>{{ review_comment.user.nickname }}</span>
+                            <span>{{ review_comment.comment_time }}</span>
+                            <a href="#" class="review-comment-delete">删除</a>
+                        </div>
+                        <div class="col-md-12">
+                            <div>{{ review_comment.content }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            <form id="user_comment_form" onsubmit="return false;">
+                {% csrf_token %}
+                <div class="row">
+                    <input type="hidden" name="review" value="{{ review.id }}"/>
+                    <div class="col-md-1">
+                        <img src="https://img3.doubanio.com/icon/u155403369-3.jpg"/>
+                    </div>
+                    <div class="col-md-8 form-group">
+                        <textarea id="user_comment_content_textarea" class="form-control" name="content" rows="3" placeholder="说点儿什么吧"></textarea>
+                    </div>
+                    <div class="col-md-offset-1 col-md-8">
+                        <a class="btn btn-default" role="button" onclick="submit_review_comment()">
+                            <span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}#user-review-comment">上一页</a>
+                        {% endif %}
+
+                        <span class="current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}#user-review-comment">下一页</a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        function submit_review_likes(is_to_add) {
+            var url
+            if(is_to_add){
+                url = "{% url 'reviews:add_review_likes' %}"
+            } else {
+                url = "{% url 'reviews:delete_review_likes' %}"
+            }
+            $.ajax({
+		             type: "POST",
+		             url: url,
+		             data: $('#review_likes_form').serialize(),
+		             dataType: "json",
+		             success: function(data){
+                         window.history.go(0)
+		             }
+            });
+        }
+
+        function submit_review_comment() {
+            if($('#user_comment_content_textarea').val()) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'reviews:add_review_comment' %}",
+                    data: $('#user_comment_form').serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        history.go(0)
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert('服务器错误，请稍后重试！')
+                    }
+                });
+            }
+        }
+
+        $(function () {
+            $('.user-review-comment-area').each(function (i) {
+                $(this).mouseover(function () {
+                    $('.review-comment-delete').show()
+                })
+                $(this).mouseout(function () {
+                    $('.review-comment-delete').hide()
+                })
+            })
+        })
+    </script>
+{% endblock %}

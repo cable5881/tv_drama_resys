@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}首页{% endblock %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block content %}
+
+{% if form.errors %}
+    <p>
+        <strong>{{ form.errors }}</strong>
+    </p>
+{% endif %}
+
+<div class="container">
+    <div class="panel panel-default sign-panel">
+        <div class="panel-body">
+            <form class="form-horizontal" action="{% url 'accounts:sign_up' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="emailInput" class="col-sm-3 control-label">Email</label>
+                    <div class="col-sm-6">
+                        <input type="email" class="form-control" id="emailInput" placeholder="jackbauer@gmail.com"  name="email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="passwordInput1" class="col-sm-3 control-label">Password</label>
+                    <div class="col-sm-6">
+                        <input type="password" class="form-control" id="passwordInput1" name="password1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="passwordInput2" class="col-sm-3 control-label">Password confirmation</label>
+                    <div class="col-sm-6">
+                        <input type="password" class="form-control" id="passwordInput2" name="password2">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="nicknameInput" class="col-sm-3 control-label">Nickname</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="nicknameInput" name="nickname">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cityInput" class="col-sm-3 control-label">City</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="cityInput" name="city">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="dateOfBirthInput" class="col-sm-3 control-label">Birthday</label>
+                    <div class="col-sm-6">
+                        <input type="date" class="form-control" id="dateOfBirthInput" name="date_of_birth">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="sexInput" class="col-sm-3 control-label">Sex</label>
+                    <div class="col-sm-6">
+                        <select class="form-control" name="sex">
+                            {% for sex in sexes %}
+                                <option value="{{ sex|first }}">{{ sex|last }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-3 col-sm-6">
+                        <button type="submit" class="btn btn-default">sign up</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}修改个人信息{% endblock %}
+
+{% block content %}
+<form id="user_change_form" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="button" value="Save" onclick="before_submit()"/>
+</form>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    function check() {
+        return confirm("确认信息无误并且提交？");
+    }
+
+    function before_submit() {
+        if (check()) {
+            $.ajax({
+		             type: "POST",
+		             url: "{% url 'accounts:change_user' %}",
+		             data: $("#user_change_form").serialize(),
+		             dataType: "json",
+		             success: function(data){
+                         alert(data.msg);
+		             }
+            });
+        }
+    }
+</script>
+{% endblock %}

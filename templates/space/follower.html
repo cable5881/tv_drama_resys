@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load my_tag %}
+
+{% block title %}
+    {% if check_user == user %}
+        关注我的人
+    {% else %}
+        关注{{ check_user.nickname }}的人
+    {% endif %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% csrf_token %}
+        <div class="row">
+            {% if check_user == user %}
+                <h2>关注我的人({{ paginator.count }})</h2>
+            {% else %}
+                <h2>关注{{ check_user.nickname }}的人({{ paginator.count }})</h2>
+            {% endif %}
+        </div>
+
+        <div>
+            {% for f in object_list %}
+                <div class="row">
+                    <div class="col-md-1">
+                        <a href="{% url 'space:index_with_id' f.follower_id %}">
+                            <img src="https://img3.doubanio.com/icon/u155403369-3.jpg">
+                        </a>
+                    </div>
+                    <div class="col-md-8 space-follower-user-info">
+                        <div class="col-md-10">
+                            <p>
+                                <a href="{% url 'space:index_with_id' f.follower_id%}">
+                                    <mark>{{ f.follower.nickname }}</mark>
+                                </a>
+                            </p>
+                            <span>签名：{% if f.follower.introduction %}{{ f.follower.introduction }}{% endif %}</span>
+                        </div>
+
+                        {% if f.follower_id in followings %}
+                            <div class="col-md-2 space-following-cancel">
+                                <span class="span-button" data-following="{{ f.follower_id }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 取消关注</span>
+                            </div>
+                        {% else %}
+                            <div class="col-md-2">
+                                <a class="following_btn" role="button" data-value="{{ f.follower_id }}">
+                                    <span><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 添加关注</span>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-9 hr"></div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                            {% endif %}
+
+                            <span class="current">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $(function () {
+        $('.space-follower-user-info').each(function (i) {
+            var cancel_btn = $(this).find('.span-button')
+
+            $(cancel_btn).click(function () {
+                var fid = $(cancel_btn).attr('data-following')
+                if(confirm('您确定要取消关注该用户？')) {
+                    cancel_following(fid)
+                }
+            })
+
+            $(this).mouseover(function () {
+                $(this).children('.space-following-cancel').show()
+            })
+            $(this).mouseout(function () {
+                $(this).children('.space-following-cancel').hide()
+            })
+        })
+    })
+
+    $(function () {
+        $('.space-following-user-info').each(function (i) {
+            var cancel_btn = $(this).find('.span-button')
+
+            $(cancel_btn).click(function () {
+                var fid = $(cancel_btn).attr('data-following')
+                if(confirm('您确定要取消关注该用户？')) {
+                    cancel_following(fid)
+                }
+            })
+
+            $(this).mouseover(function () {
+                $(this).children('.space-following-cancel').show()
+            })
+            $(this).mouseout(function () {
+                $(this).children('.space-following-cancel').hide()
+            })
+        })
+    })
+
+    function cancel_following(fid) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'space:cancel_following' %}",
+            data: 'csrfmiddlewaretoken=' + $('input[name=csrfmiddlewaretoken]').val() + '&fid=' + fid,
+            dataType: "json",
+            success: function (data) {
+                history.go(0)
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert('服务器错误，请稍后重试！')
+            }
+        });
+    }
+
+    $('.following_btn').click(function () {
+        var csrf = $('input[name=csrfmiddlewaretoken]').val();
+        var uid = $(this).attr('data-value');
+        addFollowing(csrf, uid);
+    })
+
+    function addFollowing(csrf, uid) {
+        var data = 'csrfmiddlewaretoken=' + csrf + '&following_id=' + uid
+        $.ajax({
+                 type: "POST",
+                 url: "{% url 'space:add_following' %}",
+                 data: data,
+                 dataType: "json",
+                 success: function(data){
+                     history.go(0);
+                 },
+                 error: function(XMLHttpRequest, textStatus, errorThrown) {
+                     alert(XMLHttpRequest.status);
+                     alert(XMLHttpRequest.readyState);
+                     alert(textStatus);
+                 }
+        });
+    }
+</script>
+{% endblock %}

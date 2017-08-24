@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load my_tag %}
+
+{% block title %}
+    {% if check_user == request.user %}
+        我的空间
+    {% else %}
+        {{ check_user.nickname }}的空间
+    {% endif %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <!-- 标题自我介绍 -->
+        <div class="row">
+            <div class="col-md-1 space-headline-container">
+                <img class="user-profile-small" src="https://img3.doubanio.com/icon/u39561667-4.jpg"/>
+            </div>
+            <div class="col-md-8 space-headline-container">
+                <h1>{{ check_user.nickname }} <small>{{ check_user.introduction|noNone }}</small></h1>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 标签页 -->
+            <div class="col-md-9">
+                <div>
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active">
+                            {% if check_user == request.user  %}
+                                <a href="#home" aria-controls="home" role="tab" data-toggle="tab">我的主页</a>
+                            {% else %}
+                                <a href="#home" aria-controls="home" role="tab" data-toggle="tab">{{ check_user.nickname }}的主页</a>
+                            {% endif %}
+                        </li>
+                        <li role="presentation">
+                            <a href="#likes" aria-controls="likes" role="tab" data-toggle="tab">喜欢</a>
+                        </li>
+                        {% if check_user == user %}
+                        <li role="presentation">
+                            <a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">个人</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <!-- 我的主页 -->
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>{{ check_user.nickname }}的剧评··········<mark><a href="#">共{{ hot_reviews.count }}条</a></mark></h3>
+                                </div>
+                            </div>
+                            {% for review in hot_reviews %}
+                                <div class="row space-index-review-list">
+                                    {% with review.drama as  drama %}
+                                        <div class="col-md-2">
+                                            <a href="{% url 'dramas:drama_detail' drama.id %}">
+                                                <img src="{{ drama.image }}" alt="{{ drama.title_cn }}" style="height: 150px; width: 100px;">
+                                            </a>
+                                        </div>
+                                        <div class="col-md-10 review-list-user-info">
+                                            <h5><mark><a href="{% url 'reviews:review_detail' review.id %}">{{ review.title }}</a></mark></h5>
+                                            <span>{{ drama.title_en }}</span>
+
+                                            {% divide review.rating 2 as stars %}
+                                            <span class="review-list-rating" data-value="{{ review.rating }}">
+                                                {% for i in stars|times %}
+                                                    <i class="glyphicon glyphicon-star"></i>
+                                                {% endfor %}
+                                            </span>
+                                            <span>{{ review.pubtime }}</span>
+                                            <p>{{ review.content|truncatechars:200 }}
+                                                <mark><a href="{% url 'reviews:review_detail' review.id %}">共{{ review.review_comments.count }}回应</a></mark>
+                                            </p>
+                                        </div>
+                                    {% endwith %}
+                                </div>
+                            {% endfor %}
+                            <div class="row hr"></div>
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>{{ check_user.nickname }}想看··········<mark><a href="#">共{{ unwatched_reviews.count }}部</a></mark></h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 space-index-watches-list">
+                                    {% load my_tag %}
+                                    {% filterQuerySet  unwatched_reviews 0 4 as reviews_unwatched %}
+                                    {% for review in reviews_unwatched %}
+                                        <a href="{% url 'dramas:drama_detail' review.drama.id %}">
+                                            <img src="{{ review.drama.image }}" alt="{{ review.drama.title_cn }}" style="height: 150px; width: 100px;">
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="row hr"></div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>{{ check_user.nickname }}看过··········<mark><a href="#">共{{ watched_reviews.count }}部</a></mark></h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 space-index-watches-list">
+                                    {% filterQuerySet watched_reviews 0 6 as reviews_watched %}
+                                    {% for review in reviews_watched %}
+                                        <a href="{% url 'dramas:drama_detail' review.drama.id %}">
+                                            <img src="{{ review.drama.image }}" alt="{{ review.drama.title_cn }}"
+                                                 style="height: 150px; width: 100px;">
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 我的主页 -->
+
+                        <!-- 我的喜欢 -->
+                        <div role="tabpanel" class="tab-pane" id="likes">
+                            <h3>{{ check_user.nickname }}喜欢的剧评··········<mark><a href="#">共{{ check_user.review_likes.count }}条</a></mark></h3>
+                            {% for review_likes in recent_review_likes %}
+                                <div class="row space-index-review-list">
+                                    {% with review_likes.review as  review %}
+                                        <div class="col-md-2">
+                                            <a href="{% url 'dramas:drama_detail' review.drama.id %}">
+                                                <img src="{{ review.drama.image }}" alt="{{ review.drama.title_cn }}" style="height: 150px; width: 100px;">
+                                            </a>
+                                        </div>
+                                        <div class="col-md-10 review-list-user-info">
+                                            <h5><mark><a href="{% url 'reviews:review_detail' review.id %}">{{ review.title }}</a></mark></h5>
+                                            <span>{{ review.drama.title_en }}</span>
+                                            {% load my_tag %}
+                                            {% divide review.rating 2 as stars %}
+                                            <span class="review-list-rating" data-value="{{ review.rating }}">
+                                                {% for i in stars|times %}
+                                                    <i class="glyphicon glyphicon-star"></i>
+                                                {% endfor %}
+                                            </span>
+                                            <span>{{ review.pubtime }}</span>
+                                            <p>{{ review.content|truncatechars:200 }}
+                                                <mark><a href="{% url 'reviews:review_detail' review.id %}">共{{ review.review_comments.count }}回应</a></mark>
+                                            </p>
+                                        </div>
+                                    {% endwith %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <!-- 我的喜欢 -->
+
+                        <!-- 我的设置 -->
+                        {% if check_user == user %}
+                        <div role="tabpanel" class="tab-pane" id="settings">
+                            <form class="form-horizontal" id="user_change_form" style="margin-top: 15px" onsubmit="return false;">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="profile-img" class="col-sm-3 control-label">Profile</label>
+                                    <div class="col-sm-6">
+                                        <img id="profile-img" src="https://img3.doubanio.com/icon/u155403369-3.jpg" style="height: 50px;width: 50px"/>
+                                    </div>
+
+                                </div>
+                                <div class="form-group">
+                                    <label for="emailInput" class="col-sm-3 control-label">Email</label>
+                                    <div class="col-sm-6">
+                                        <input type="email" class="form-control" id="emailInput"
+                                               placeholder="jackbauer@gmail.com" name="email" value="{{ user.email }}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nicknameInput" class="col-sm-3 control-label">Nickname</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" id="nicknameInput" name="nickname" value="{{ user.nickname }}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="dateOfBirthInput" class="col-sm-3 control-label">Birthday</label>
+                                    <div class="col-sm-6">
+                                        <input type="date" class="form-control" id="dateOfBirthInput"
+                                               name="date_of_birth" value="{{ user.date_of_birth.isoformat }}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sexInput" class="col-sm-3 control-label">Sex</label>
+                                    <div class="col-sm-6">
+                                        <select class="form-control" name="sex">
+                                            {% for sex in sexes %}
+                                                {% if user.sex == sex|first %}
+                                                    <option value="{{ sex|first }}" selected="selected">{{ sex|last }}</option>
+                                                {% else %}
+                                                    <option value="{{ sex|first }}">{{ sex|last }}</option>
+                                                {% endif %}
+
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-3 col-sm-6">
+                                        <button class="btn btn-default" onclick="modify_user_info()">修改</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        {% endif %}
+                        <!-- 我的设置 -->
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 图文自我介绍 -->
+            <div class="col-md-3">
+                <div class="row">
+                    <div class="form-group has-feedback">
+                        <input type="text" class="form-control" id="searchInput" placeholder="搜索您感兴趣的人">
+                        <span id="searchButton" class="glyphicon glyphicon-search form-control-feedback span-button" aria-hidden="true"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 space-profile-img">
+                        <img src="https://img3.doubanio.com/icon/ul155403369-3.jpg" style="border-radius: 10%; height: 200px; width: 150px;">
+                    </div>
+                    <div class="col-md-12 space-profile-info text-center">
+                        <p>{{ check_user.date_joined|date:'Y-m-d' }}加入TV Drama</p>
+                        <p>
+                            {% if check_user.sex == 'B' %}性别：♂
+                            {% elif check_user.sex == 'G' %}性别：♀
+                            {% else %}性别：保密
+                            {% endif %}
+                        </p>
+                        <p>城市：{{ check_user.city }}</p>
+                        <p>关注：<a href="{% url 'space:space_following' check_user.id %}">{{ check_user.followings.count }}</a></p>
+                        <p>粉丝：<a href="{% url 'space:space_follower' check_user.id %}">{{ check_user.followers.count }}</a></p>
+                        {% if check_user is not user and followed is not True %}
+                            <a id="following_btn" class="btn btn-default" role="button" onclick="addFollowing()" data-value="{{ check_user.id }}">
+                                {% csrf_token %}
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 关注
+                            </a>
+                        {% elif check_user is not user and followed %}
+                            {% csrf_token %}
+                            <span><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 已关注</span>
+                            <span class="span-button" onclick="cancel_following({{ check_user.id }})"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 取消关注</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    function check() {
+        return confirm("确认信息无误并且提交？");
+    }
+
+    function modify_user_info() {
+        if (check()) {
+            $.ajax({
+		             type: "POST",
+		             url: "{% url 'accounts:change_user' %}",
+		             data: $("#user_change_form").serialize(),
+		             dataType: "json",
+		             success: function(data){
+                         history.go(0);
+		             },
+                     error: function(XMLHttpRequest, textStatus, errorThrown) {
+                         alert(XMLHttpRequest.status);
+                         alert(XMLHttpRequest.readyState);
+                         alert(textStatus);
+                     }
+            });
+        }
+    }
+
+    function addFollowing() {
+        var csrf = $('input[name=csrfmiddlewaretoken]').val()
+        var fid = $('#following_btn').attr('data-value')
+        var data = 'csrfmiddlewaretoken=' + csrf + '&following_id=' + fid
+        $.ajax({
+                 type: "POST",
+                 url: "{% url 'space:add_following' %}",
+                 data: data,
+                 dataType: "json",
+                 success: function(data){
+                     history.go(0);
+                 },
+                 error: function(XMLHttpRequest, textStatus, errorThrown) {
+                     alert(XMLHttpRequest.status);
+                     alert(XMLHttpRequest.readyState);
+                     alert(textStatus);
+                 }
+        });
+    }
+
+    function cancel_following(fid) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'space:cancel_following' %}",
+            data: 'csrfmiddlewaretoken=' + $('input[name=csrfmiddlewaretoken]').val() + '&fid=' + fid,
+            dataType: "json",
+            success: function (data) {
+                history.go(0)
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert('服务器错误，请稍后重试！')
+            }
+        });
+    }
+
+    $('#searchButton').click(submit_search)
+
+    function submit_search() {
+        var search_text = $('#searchInput').val()
+        if (search_text) {
+            window.location.href = "/space/search/wd=" + search_text
+        }
+    }
+
+    $('#searchInput').keydown(function (event) {
+        var e = event || window.event || arguments.callee.caller.arguments[0];
+
+        if (e && e.keyCode == 13) { // enter 键
+            submit_search()
+        }
+    })
+</script>
+{% endblock %}

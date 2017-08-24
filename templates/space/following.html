@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load my_tag %}
+
+{% block title %}
+    {% if check_user == user %}
+        我的关注
+    {% else %}
+        {{ check_user.nickname }}的关注
+    {% endif %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            {% if check_user == user %}
+                <h2>我关注的人({{ paginator.count }})</h2>
+            {% else %}
+                <h2>{{ check_user.nickname }}关注的人({{ paginator.count }})</h2>
+            {% endif %}
+        </div>
+
+        <div>
+            {% for f in object_list %}
+                <div class="row">
+                    <div class="col-md-1">
+                        <a href="{% url 'space:index_with_id' f.following.id %}">
+                            <img src="https://img3.doubanio.com/icon/u155403369-3.jpg">
+                        </a>
+                    </div>
+
+                    <div class="col-md-8 space-following-user-info">
+                        <div class="col-md-10">
+                            <p>
+                                <a href="{% url 'space:index_with_id' f.following.id %}">
+                                    <mark>{{ f.following.nickname }}</mark>
+                                </a>
+                            </p>
+                            <span>签名：{% if f.following.introduction %}{{ f.following.introduction }}{% endif %}</span>
+                        </div>
+                        <div class="col-md-2 space-following-cancel">
+                            {% csrf_token %}
+                            <span class="span-button" data-following="{{ f.following.id }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 取消关注</span>
+                        </div>
+                    </div>
+                    <div class="col-md-9 hr"></div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- 分页 -->
+        <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                            {% endif %}
+
+                            <span class="current">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $(function () {
+        $('.space-following-user-info').each(function (i) {
+            var cancel_btn = $(this).find('.span-button')
+
+            $(cancel_btn).click(function () {
+                var fid = $(cancel_btn).attr('data-following')
+                if(confirm('您确定要取消关注该用户？')) {
+                    cancel_following(fid)
+                }
+            })
+
+            $(this).mouseover(function () {
+                $(this).children('.space-following-cancel').show()
+            })
+            $(this).mouseout(function () {
+                $(this).children('.space-following-cancel').hide()
+            })
+        })
+    })
+
+
+    function cancel_following(fid) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'space:cancel_following' %}",
+            data: 'csrfmiddlewaretoken=' + $('input[name=csrfmiddlewaretoken]').val() + '&fid=' + fid,
+            dataType: "json",
+            success: function (data) {
+                history.go(0)
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert('服务器错误，请稍后重试！')
+            }
+        });
+    }
+</script>
+{% endblock %}

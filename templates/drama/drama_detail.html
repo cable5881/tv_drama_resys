@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{{ object.title_cn }}{% endblock %}
+
+{% block css %}
+    <link href="{% static 'home/plugins/bootstrap-star-rating-4.0.1/css/star-rating.min.css' %}" media="all" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block content %}
+
+<!-- All drama related info start -->
+<div class="container">
+    <!-- drama title -->
+    <div class="row">
+        <h1 class="col-md-12">{{ object.title_cn }} {{ object.title_en }}(<small>{{ object.year }}</small>)</h1>
+    </div>
+
+    <!-- drama info -->
+    <div class="row">
+        <div class="col-md-3">
+            <img class="img-thumbnail" src="{{ object.image }}" alt="{{ object.title_cn }}海报">
+        </div>
+        <div class="col-md-6">
+            <p>
+                <span><strong>导演</strong></span>:<span>
+                    {% for director in object.director_set.all %}
+                        {{ director.name }} /
+                    {% endfor %}
+                </span>
+            </p>
+            <p>
+                <span><strong>主演</strong></span>:<span>
+                    {% for cast in object.cast_set.all %}
+                        {{ cast.name }} /
+                    {% endfor %}
+                </span>
+            </p>
+            <p>
+                <span><strong>类型</strong></span>:<span>
+                {% for type in object.types.all %}
+                    {{ type.type }} /
+                {% empty %}
+                {% endfor %}
+                </span>
+            </p>
+            <p>
+                <span><strong>又名</strong></span>:<span>{{ object.alternate_name }}</span>
+            </p>
+            <p>
+                <span><strong>集数</strong></span>:<span>{{ object.episodes }}</span>
+            </p>
+            <p>
+                <span><strong>当前季</strong></span>:<span>
+                    {% if not object.current_season%}
+                        1
+                    {% else %}
+                        {{ object.current_season }}
+                    {% endif %}
+                </span>
+            </p>
+            <p>
+                <span><strong>豆瓣链接</strong></span>:<span><a href="{{ object.douban_url}}" target="_blank">{{ object.id}}</a></span>
+            </p>
+            <div>
+                {% if not current_user_review %}
+                    <input id="rate_button" class="rating rate_button" type="number" name="rating"/>
+                    <button type="button" class="btn btn-default btn-lg" onclick="wannaWatch({{ object.id }})">
+                        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                        <span>想看</span>
+                    </button>
+                    <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal">
+                        <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                        <span>看过</span>
+                    </button>
+                {% elif current_user_review.is_watched %}
+                    <strong>我看过这部电视剧</strong>:
+                    <mark>{{ current_user_review.pubtime }}</mark>
+                    <input id="rate_button" class="rating rate_button" type="number" name="rating" value="{{ current_user_review.rating }}"/>
+                    <a role="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal">
+                        <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                        <span>修改</span>
+                    </a>
+                    <a class="btn btn-warning btn-xs" role="button" onclick="deleteReview({{ current_user_review.id }})">
+                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                        <span>删除</span>
+                    </a>
+                {% else %}
+                    <strong>我想看这部电视剧</strong>:
+                    <mark>{{ current_user_review.pubtime }}</mark>
+                    <p>
+                        <a role="button" class="btn btn-default btn-sm active" onclick="deleteReview({{ current_user_review.id }})">
+                            <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                            <span>想看</span>
+                        </a>
+                        <a role="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#myModal">
+                            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                            <span>看过</span>
+                        </a>
+                    </p>
+                {% endif %}
+            </div>
+            <p>
+                <!-- JiaThis Button BEGIN -->
+                <div class="jiathis_style_24x24">
+                    <a class="jiathis_button_qzone"></a>
+                    <a class="jiathis_button_tsina"></a>
+                    <a class="jiathis_button_tqq"></a>
+                    <a class="jiathis_button_weixin"></a>
+                    <a class="jiathis_button_renren"></a>
+                    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis"
+                       target="_blank"></a>
+                    <a class="jiathis_counter_style"></a>
+                </div>
+                <!-- JiaThis Button END -->
+            </p>
+        </div>
+
+        <!-- rating -->
+        <div class="col-md-3">
+            <h2>评分 {{ object.avg_rating }}</h2>
+            <input id="avg_rating" name="rating" type="number" class="rating" value="{{ object.avg_rating }}"/>
+        </div>
+    </div>
+
+    <!-- drama summary -->
+    <div class="row">
+        <div class="col-md-9">
+            <h4>{{ object.title_en}} 剧情简介</h4>
+            <p style="text-indent: 1.5em">{{ object.summary }}</p>
+        </div>
+    </div>
+
+    <!-- 推荐 -->
+    <div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4>猜你喜欢</h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-6 col-md-10">
+            {% for d in recmd_dramas %}
+                <a href="{% url 'dramas:drama_detail' d.id %}">
+                    <img src="{{ d.image }}" class="img-thumbnail recommend-list" alt="{{ d.title_cn }}" style="height: 210px;width: 140px">
+                </a>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    <!-- 推荐结束 -->
+
+    <!-- 评论开始 -->
+    <div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4>{{ object.title_cn }}的剧评(全部共<a href="{% url 'reviews:review_list' object.id %}"><mark>{{ reviews|length }}</mark></a>条)</h4>
+            </div>
+        </div>
+
+        {% for review in reviews %}
+            <div>
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="review-list-title">
+                            <a href="{% url 'reviews:review_detail' review.id %}"><span>{{ review.title }}</span></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6 col-md-9 review-list-user-info">
+                        <a href="{% url 'space:index_with_id' review.user_id %}">
+                            <img src="https://img3.doubanio.com/icon/u39561667-4.jpg"/>
+                        </a>
+                        <a href="{% url 'space:index_with_id' review.user_id %}">
+                            <span>{{ review.user.nickname }}</span>
+                        </a>
+
+                        {% load my_tag %}
+                        {% divide review.rating 2 as stars %}
+                        <span class="review-list-rating" data-value="{{ review.rating }}">
+                            {% for i in stars|times %}
+                            <i class="glyphicon glyphicon-star"></i>
+                            {% endfor %}
+                        </span>
+                        <span>{{ review.pubtime }}</span>
+                        <div class="review-list-like">
+                            <span class="glyphicon glyphicon-thumbs-up"></span>
+                            <span>{{ review.review_likes.count }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-6 col-md-9">
+                        <p>{{ review.content |truncatechars:200}}
+                            <mark><a href="{% url 'reviews:review_detail' review.id %}">共{{ review.review_comments.count }}回应</a></mark>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <!-- 评论结束 -->
+
+</div>
+
+<!-- Rating Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">我看过这部美剧</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <input id="modal_rate_button" class="rate_button" name="rating" type="number" class="rating">
+                    </div>
+                </div>
+                <form id="review_form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <input id="review_title" class="form-control" type="text" name="title" value="{{ current_user_review.title|noNone }}" placeholder="请输入标题">
+                        </div>
+                        <div class="form-group col-md-12">
+                            <textarea id="review_content" class="form-control" rows="8" name="content" placeholder="写下您精彩的剧评">{{ current_user_review.content|noNone }}</textarea>
+                        </div>
+                    </div>
+                    <input type="hidden" name="drama" value="{{ object.id }}"/>
+                    <input type="hidden" name="pk" value="{{ current_user_review.id }}"/>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="submit_review()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script type="text/javascript" src="http://v3.jiathis.com/code_mini/jia.js" charset="utf-8"></script>
+<script src="{% static 'home/plugins/bootstrap-star-rating-4.0.1/js/star-rating.min.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+    starCaptions = {
+        0.5: '很差',
+        1.5: '很差',
+        1: '很差',
+        2.5: '较差',
+        2: '较差',
+        3.5: '还行',
+        3: '还行',
+        4.5: '推荐',
+        4: '推荐',
+        5.5: '力荐',
+        5: '力荐'
+    }
+
+    if ($('#rate_button').val()) {
+        stars = getStarsByRatingScore($('#rate_button').val())
+        $('#rate_button').rating({
+            stars: 5,
+            min: 0,
+            max: 5,
+            step: 1,
+            size: 'xs',
+            starCaptions: starCaptions,
+            showClear: false,
+            readonly: true,
+        }).rating('update', stars)
+        $('#modal_rate_button').rating({
+            stars:5,
+            min:0,
+            max:5,
+            step:1,
+            size:'xs',
+            starCaptions:starCaptions,
+            clearCaption:'评分',
+            showClear:false,
+        }).rating('update', stars)
+    } else {
+        $(".rate_button").rating({
+            stars:5,
+            min:0,
+            max:5,
+            step:1,
+            size:'xs',
+            starCaptions:starCaptions,
+            clearCaption:'评分',
+            showClear:false,
+        }).on('rating.change', function(event, value, caption) {
+            $('#myModal').modal('show')
+            $('#modal_rate_button').rating('update', value)
+        });
+    }
+
+    // 只读的评分显示
+    var score = $('#avg_rating').val()
+    var stars = getStarsByRatingScore(score)
+    $("#avg_rating").rating({
+        stars:5,
+        min:0,
+        max:5,
+        step:0.5,
+        size:'md',
+        showClear:false,
+        starCaptions: starCaptions,
+        readonly:true,
+    }).rating('update', stars)
+
+    // 提交剧评
+    function submit_review(val) {
+        var val = $('#modal_rate_button').val() * 2
+        if(val > 0) {
+            $.ajax({
+		             type: "POST",
+		             url: "{% url 'reviews:add_review' %}",
+		             data: $("#review_form").serialize() + "&rating=" + val,
+		             dataType: "json",
+		             success: function(data){
+                         history.go(0);
+		             },
+                     error: function (XMLHttpRequest, textStatus, errorThrown) {
+                         alert('服务器错误，请稍后重试！')
+                     }
+            });
+        } else {
+            alert('请您先评分')
+        }
+    }
+
+    // 根据评分返回星星个数
+    function getStarsByRatingScore(score) {
+        var stars
+        if (score <= 1) {
+            stars = 0.5
+        } else if (score > 1 && score <= 2) {
+            stars = 1
+        } else if (score > 2 && score <= 3) {
+            stars = 1.5
+        } else if (score > 3 && score <= 4) {
+            stars = 2
+        } else if (score > 4 && score <= 5) {
+            stars = 2.5
+        } else if (score > 5 && score <= 6) {
+            stars = 3
+        } else if (score > 6 && score <= 7) {
+            stars = 3.5
+        } else if (score > 7 && score <= 8) {
+            stars = 4
+        } else if (score > 8 && score <= 9) {
+            stars = 4.5
+        } else if (score > 9) {
+            stars = 5
+        }
+
+        return stars
+    }
+
+    function deleteReview(pk) {
+        if(!confirm('您确定要删除此剧评吗？')) {
+            return
+        }
+        var csrf = $("input[name='csrfmiddlewaretoken']").val()
+        $.ajax({
+		             type: "POST",
+		             url: "{% url 'reviews:delete_review' %}",
+		             data: "pk=" + pk + "&csrfmiddlewaretoken=" + csrf,
+		             dataType: "json",
+		             success: function(data){
+                         history.go(0);
+		             },
+                     error: function (XMLHttpRequest, textStatus, errorThrown) {
+                         alert('服务器错误，请稍后重试！')
+                     }
+            });
+    }
+
+    function wannaWatch(drama) {
+        var csrf = $("input[name='csrfmiddlewaretoken']").val()
+        $.ajax({
+		             type: "POST",
+		             url: "{% url 'reviews:unwatch_review' %}",
+		             data: "drama=" + drama + "&csrfmiddlewaretoken=" + csrf,
+		             dataType: "json",
+		             success: function(data){
+                         history.go(0);
+		             },
+                     error: function (XMLHttpRequest, textStatus, errorThrown) {
+                         alert('服务器错误，请稍后重试！')
+                     }
+            });
+    }
+</script>
+{% endblock %}
